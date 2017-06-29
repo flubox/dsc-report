@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - src/states/design.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>src/states/design.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">43.24</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">69</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">6.94</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">0.39</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">// TODO: clean properties &#039;templates&#039;, &#039;layouts&#039; with empty arrays
+export const initialState = {
+    &#039;id&#039;: &#039;&#039;,
+    &#039;name&#039;: &#039;&#039;,
+    &#039;toolkitId&#039;: &#039;&#039;,
+    &#039;pages&#039;: [{
+        &#039;id&#039;: &#039;6711d5a8-a1f9-41b5-92f8-797a2f8eb578&#039;,
+        &#039;index&#039;: 1,
+        &#039;width&#039;: 297.0,
+        &#039;height&#039;: 420.0,
+        &#039;pageType&#039;: &#039;FRONT COVER&#039;,
+        &#039;templateId&#039;: &#039;Template_2&#039;,
+        &#039;layoutId&#039;: &#039;Layout_1&#039;,
+        &#039;format&#039;: &#039;A3_PORTRAIT&#039;
+    }],
+    &#039;categoryOptions&#039;: [],
+    &#039;pageDescs&#039;: [],
+    &#039;groupDescs&#039;: [],
+    &#039;templates&#039;: [{
+        &#039;id&#039;: &#039;Template_1&#039;,
+        &#039;width&#039;: 297.0,
+        &#039;height&#039;: 420.0,
+        &#039;format&#039;: &#039;A3_PORTRAIT&#039;,
+        &#039;elements&#039;: [{
+            &#039;rotationLock&#039;: true,
+            &#039;positionLockX&#039;: true,
+            &#039;positionLockY&#039;: true,
+            &#039;sizeLockX&#039;: true,
+            &#039;sizeLockY&#039;: true,
+            &#039;ratioLock&#039;: true,
+            &#039;x&#039;: 56.731228,
+            &#039;y&#039;: 213.26877,
+            &#039;z&#039;: 0.0,
+            &#039;width&#039;: 194.06877,
+            &#039;height&#039;: 79.69122,
+            &#039;minWidth&#039;: -1.0,
+            &#039;minHeight&#039;: -1.0,
+            &#039;rotation&#039;: 0.0,
+            &#039;elementType&#039;: &#039;ElementBackground&#039;,
+            &#039;imageRef&#039;: &#039;TOOLKIT_FATHERSDAY_2016_V2_BACKGROUND_03&#039;
+        }]
+    }],
+    &#039;layouts&#039;: [{
+        &#039;id&#039;: &#039;Layout_1&#039;,
+        &#039;width&#039;: 297.0,
+        &#039;height&#039;: 420.0,
+        &#039;format&#039;: &#039;A3_PORTRAIT&#039;,
+        &#039;elements&#039;: [{
+            &#039;rotationLock&#039;: true,
+            &#039;positionLockX&#039;: true,
+            &#039;positionLockY&#039;: true,
+            &#039;sizeLockX&#039;: true,
+            &#039;sizeLockY&#039;: true,
+            &#039;ratioLock&#039;: true,
+            &#039;x&#039;: 41.0,
+            &#039;y&#039;: 35.0,
+            &#039;z&#039;: 0.0,
+            &#039;width&#039;: 100.0,
+            &#039;height&#039;: 100.0,
+            &#039;minWidth&#039;: -1.0,
+            &#039;minHeight&#039;: -1.0,
+            &#039;rotation&#039;: 0.0,
+            &#039;elementType&#039;: &#039;ElementAperture&#039;
+        }]
+    }],
+    &#039;pageRepeatables&#039;: [
+        &#039;INITIAL_INNER_PAGE&#039;
+    ]
+};</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ cyclomatic }} <br>
+    Length : {{ halstead.length }} <br>
+    Difficulty : {{ halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

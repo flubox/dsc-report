@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - src/helpersDesignForm.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>src/helpersDesignForm.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">100.00</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">177</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">16.57</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">1.17</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">import React, { PropTypes } from &#039;react&#039;
+import PageDesc from &#039;./components/PageDesc&#039;
+import CategoryOption from &#039;./components/CategoryOption&#039;
+import GroupDesc from &#039;./components/GroupDesc&#039;
+import GroupOptionInfos from &#039;./components/GroupOptionInfos&#039;
+import Sequence from &#039;./components/Sequence&#039;
+import Covers from &#039;./components/Covers&#039;
+const designSchema = require(&#039;./schemas/design.json&#039;)
+
+/**
+ * newDesignElements
+ * @type {Object}
+ */
+export const newDesignElements = {
+    name: &#039;&#039;,
+    pageDescs: {
+        id: &#039;pageDescId&#039;,
+        defaultThumbnail: &#039;&#039;,
+        pageId: 0,
+        pageType: &#039;pageType&#039;,
+        altPages: [&#039;altPages1&#039;, &#039;altPages2&#039;, &#039;altPages3&#039;]
+    },
+    pageRepeatables: [&#039;&#039;],
+    toolkitId: &#039;&#039;,
+    categoryOptions: {
+        categoryId: &#039;&#039;,
+        options: [{
+            id: &#039;&#039;,
+            value: &#039;&#039;,
+            name: &#039;&#039;
+        }]
+    },
+    groupDescs: {
+        groupId: &#039;&#039;,
+        groupDescInfos: [{
+            pageDescId: &#039;&#039;,
+            pageId: &#039;&#039;
+        }]
+    },
+    sequences: {
+        sequenceId: &#039;&#039;,
+        sequenceInfos: [{
+            pageDescId: &#039;&#039;,
+            index: &#039;&#039;
+        }]
+    }
+};
+
+/**
+ * newGroupDescInfos empty object
+ * @type {Object}
+ */
+export const newGroupDescInfos = {pageDescId: &#039;&#039;, pageId: &#039;&#039;};
+
+/**
+ * newCategoryOptionsOptions empty object
+ * @type {Object}
+ */
+export const newCategoryOptionsOptions = {id: &#039;&#039;, value: &#039;&#039;, name: &#039;&#039;};
+
+/**
+ * newSequenceInfos empty object
+ * @type {Object}
+ */
+export const newSequenceInfos = {pageDescId: &#039;&#039;, index: &#039;&#039;};
+
+/**
+ * Input number props
+ * @type {Object}
+ */
+export const inputNumberProps = {type: &#039;number&#039;, min: &#039;0&#039;};
+
+/**
+ * DesignForm roles, are used to change the display of the form
+ */
+export const formRoles = [{value: &#039;designer&#039;, text: &#039;designer&#039;}, {value: &#039;operator&#039;, text: &#039;operator&#039;}];
+
+/**
+ * Instantiates the component PageDesc
+ * @param {Object} props
+ * @returns {Component} - the rendering of the PageDesc component
+ */
+export const instancierPageDesc = props =&gt; &lt;PageDesc {...props} key={`PageDesc-${props.index}`} /&gt;;
+
+instancierPageDesc.propTypes = {
+    index: PropTypes.number.isRequired
+};
+
+/**
+ * Instantiates the component CategoryOption
+ * @param {Object} props
+ * @returns {Component} - the rendering of the CategoryOption component
+ */
+export const instancierCategoryOptions = props =&gt; &lt;CategoryOption {...props} key={`CategoryOption-${props.index}`} /&gt;;
+
+instancierCategoryOptions.propTypes = {
+    index: PropTypes.number.isRequired
+};
+
+/**
+ * Instantiates the component GroupDesc
+ * @param {Object} props
+ * @returns {Component} - the rendering of the GroupDesc component
+ */
+export const instancierGroupDescs = props =&gt; &lt;GroupDesc {...props} key={`GroupDescs-${props.index}`} /&gt;;
+
+instancierGroupDescs.propTypes = {
+    index: PropTypes.number.isRequired
+}
+
+/**
+ * Instantiates the component GroupOptionInfos
+ * @param {Object} props
+ * @returns {Component} - the rendering of the GroupOptionInfos component
+ */
+export const instancierGroupOptionInfos = props =&gt; &lt;GroupOptionInfos {...props} key={`GroupOptionInfos-${props.index}`} /&gt;;
+
+instancierGroupOptionInfos.propTypes = {
+    index: PropTypes.number.isRequired
+}
+
+/**
+ * @param {Object} props
+ * @returns {Component} - the rendering of the Sequence component
+ */
+export const instancierSequences = props =&gt; &lt;Sequence {...props} key={`Sequence-${props.index}`} /&gt;;
+instancierSequences.propTypes = {
+    index: PropTypes.number.isRequired
+};
+
+export const instancierCovers = props =&gt; &lt;Covers {...props} key={`Cover-${props.index}`} /&gt;
+
+/**
+ * Factory to instantiate Component
+ * @param {Array} iterable
+ * @param {Object} props2add
+ * @param {Function} instancier
+ * @returns {Component}
+ */
+export const factory = iterable =&gt; props2Add =&gt; instancier =&gt; Array.isArray(iterable) &amp;&amp; iterable.map((item, index) =&gt; ({...item, ...props2Add, index})).map(instancier);
+
+export const blackListedKeys = [&#039;uuid&#039;];
+
+/**
+ * Filters the keys from the blacklisted list
+ * @param {Array} blackListedKeys
+ * @returns {Object} data - filtered then reduced new data
+ */
+export const filterKeys = blackListedKeys =&gt; object =&gt; Object.keys(object).filter(k =&gt; !blackListedKeys.includes(k)).reduce((a, b) =&gt; ({ ...a, [b]: object[b] }), {});
+
+/**
+ * Concatenates the new pageDesc if from pageNumber, pageType and pageId
+ * @param {Object} name - the new name
+ * @param {Object} value - the new value
+ * @param {Object} composedId - desctructured object of {pageNumber, pageType, pageId}
+ * @return {String} the new concatenated pageDescId
+ */
+export const createPageDescId = ({name, value}) =&gt; (composedId) =&gt; {
+    composedId[name] = value;
+    return Object.values(composedId).join(&#039;_&#039;);
+};
+
+/**
+ * @returns {Object} covers - enum of a design covers
+ */
+export const covers = designSchema.properties.pageDescs.items.properties.coverType.enum;
+
+/**
+ * Aggregates the covers in an array that will be set in the design Form state
+ * Then used to display the covers
+ * @param {Boolean} isBook
+ * @param {Object} nextProps
+ * @returns {Array} array of the fifth first pages that represents the covers
+ */
+export const filterCovers = isBook =&gt; nextProps =&gt; isBook ? nextProps.filter(page =&gt; covers.includes(page.pageType)) : [];
+
+export const filterPagesWithoutCovers = isBook =&gt; nextProps =&gt; isBook ? nextProps.filter(page =&gt; !covers.includes(page.pageType)) : [];</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ cyclomatic }} <br>
+    Length : {{ halstead.length }} <br>
+    Difficulty : {{ halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

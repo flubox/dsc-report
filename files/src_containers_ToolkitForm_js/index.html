@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - src/containers/ToolkitForm.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>src/containers/ToolkitForm.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">74.00</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">184</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">51.51</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">2.65</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">import React, {Component} from &#039;react&#039;;
+import createPropTypes from &#039;react-json-schema-proptypes&#039;;
+import toolkitSchema from &#039;../schemas/toolkit.json&#039;;
+
+import { Button, CardPanel, Col, Container, Input, Icon, Collapsible, Row, CollapsibleItem } from &#039;react-materialize&#039;
+
+import autobind from &#039;autobind-decorator&#039;;
+import {addUuidToArray, changeElementFromArray, extractFromEvent, handleChange, ReactElementFactory, excludeFunctionsFromProps} from &#039;../helpers&#039;;
+
+import ToolkitFormColor from &#039;../components/ToolkitFormColor&#039;;
+import ToolkitFormImage from &#039;../components/ToolkitFormImage&#039;;
+import ToolkitFormFont from &#039;../components/ToolkitFormFont&#039;;
+
+const uuidV4 = require(&#039;uuid/v4&#039;);
+import _ from &#039;lodash&#039;;
+
+import {initialState} from &#039;../states/toolkit&#039;;
+import {initialState as colors} from &#039;../states/color&#039;;
+import {initialState as images} from &#039;../states/image&#039;;
+import {initialState as fonts} from &#039;../states/font&#039;;
+
+// import Png2Base64Service from &#039;../services/Png2Base64Service&#039;;
+import S3UploaderFromDroppedFiles from &#039;../services/S3UploaderFromDroppedFiles&#039;;
+
+const newToolkitElement = {colors, images, fonts};
+
+export const getElementProps = value =&gt; addedValue =&gt; ({...value, ...addedValue});
+
+export const addUuid = toolkit =&gt; ({...toolkit, colors: addUuidToArray(toolkit.colors), images: addUuidToArray(toolkit.images), fonts: addUuidToArray(toolkit.fonts)});
+
+export const filterKeys = blacklistedKey =&gt; object =&gt; Object.keys(object).filter(k =&gt; !blacklistedKey.includes(k)).reduce((a, b) =&gt; ({...a, [b]: object[b]}), {});
+
+export const blacklistedKey = [&#039;hash&#039;, &#039;md5&#039;, &#039;uuid&#039;];
+
+export const removeHash = data =&gt; ({
+    ...data,
+    colors: data.colors.map(filterKeys(blacklistedKey)),
+    images: data.images.map(filterKeys(blacklistedKey)),
+    fonts: data.fonts.map(filterKeys(blacklistedKey))
+});
+
+export const filterByUuid = uuid =&gt; a =&gt; a.uuid !== uuid;
+
+export const changeByUuid = uuid =&gt; key =&gt; value =&gt; a =&gt; a.uuid === uuid ? ({...a, [key]: value}) : a;
+
+@autobind
+class ToolkitForm extends Component {
+    constructor ({data, upload}) {
+        super({data});
+        this.state = {
+            data: addUuid({...data}),
+            new: true,
+            saved: false,
+            ui: {
+                addingNewImage: false
+            }
+        };
+    }
+
+    componentWillReceiveProps ({data}, nextState) {
+        this.setState({data: addUuid(data)});
+    }
+
+    handleAdd({target}) {
+        const {name} = target.name ? target : target.parentNode;
+        this.setState({data: {...this.state.data, [name]: [...this.state.data[name], _.cloneDeep({...newToolkitElement[name], uuid: uuidV4()})]}});
+    }
+
+    handleChange ({target}) {
+        this.setState(handleChange(this.state)({target}));
+    }
+
+    handleSave () {
+        this.props.handleSave(this.state.data);
+    }
+
+    handleRemove ({target}) {
+        const {id, name} = target.id ? target : target.parentNode;
+        this.setState({...this.state, data: {...this.state.data, [name]: this.state.data[name].filter(filterByUuid(id))}});
+    }
+
+    onNewImageDropped(files) {
+        // console.info(&#039;onNewImageDropped&#039;, files);
+        this.setState({ui: {...this.state.ui, addingNewImage: true}})
+    }
+
+    onS3UploadedFiles(files) {
+        // console.info(&#039;onS3UploadedFiles&#039;, files);
+        this.setState({ui: {...this.state.ui, addingNewImage: false}})
+        this.setState({
+            data: {
+                ...this.state.data,
+                images: this.state.data.images
+                .concat(
+                    files
+                    .map(uploadInfo =&gt; {
+                        uploadInfo = uploadInfo.sort((a, b) =&gt; {
+                            const wh1 = a.width &lt; b.width &amp;&amp; a.height &lt; b.height;
+                            const wh2 = a.width &gt; b.width &amp;&amp; a.height &gt; b.height;
+                            return wh1 ? -1 : wh2 ? 1 : 0;
+                        })
+                        const cleaned = uploadInfo.map((each, i) =&gt; {
+                            if (i === 0) {
+                                each = {urlThumb: each.Location}
+                            } else if (i === 1) {
+                                each = {urlScaled: each.Location}
+                            } else if (i === 2) {
+                                each = {urlFull: each.Location}
+                            }
+                            return each;
+                        }).reduce((a, b) =&gt; ({...a, ...b}), {id: uploadInfo[0].originalName});
+
+                        return {
+                            ...cleaned,
+                            imageType: toolkitSchema.properties.images.items.properties.imageType.enum[0]
+                        };
+                    })
+                )
+            }
+        })
+    }
+
+    render () {
+        const {id, thumbUrl, colors, fonts} = this.state.data;
+        const images = this.state.ui.addingNewImage ? this.state.data.images.concat({loading: true}) : this.state.data.images;
+        const offsets = {
+            colors: {&#039;md-offset&#039;: colors &amp;&amp; colors.length === 1 ? 3 : 0},
+            images: {&#039;md-offset&#039;: images &amp;&amp; images.length === 1 ? 3 : 0},
+            fonts: {&#039;md-offset&#039;: fonts &amp;&amp; fonts.length === 1 ? 3 : 0}
+        };
+        const sizes = {
+            colors: {&#039;md&#039;: colors &amp;&amp; colors.length &gt; 1 ? 3 : 6},
+            images: {&#039;md&#039;: 6},
+            fonts: {&#039;md&#039;: fonts &amp;&amp; fonts.length &gt; 1 ? 3 : 6}
+        };
+
+        const ReactColorElementMaker = addedProps =&gt; color =&gt; &lt;ToolkitFormColor key={color.uuid} color={color} {...addedProps}/&gt;;
+        const ReactImageElementMaker = addedProps =&gt; image =&gt; (&lt;ToolkitFormImage key={image.uuid || `image-loading-${uuidV4()}`} image={image} {...addedProps}/&gt;);
+        const ReactFontElementMaker = addedProps =&gt; font =&gt; (&lt;ToolkitFormFont key={font.uuid} font={font} {...addedProps}/&gt;);
+
+        const hasAnyIdea = id &amp;&amp; id.length &gt; 0;
+
+        return (
+            &lt;Row&gt;
+                &lt;Input className=&#039;col&#039; s={hasAnyIdea ? 6 : 12} label=&quot;toolkitId&quot; floatingLabel={true} value={id} name=&quot;id&quot; onChange={this.handleChange}/&gt;
+                {hasAnyIdea &amp;&amp; &lt;Input className=&#039;col&#039; s={6} label=&quot;thumbUrl&quot; floatingLabel={true} value={thumbUrl} name=&quot;thumbUrl&quot; onChange={this.handleChange}/&gt;}
+                &lt;Col x={12}&gt;
+                    &lt;Row&gt;{colors &amp;&amp; colors.length ? (&lt;legend&gt;Colors&lt;/legend&gt;) : false}&lt;/Row&gt;
+                    &lt;Row className=&quot;center&quot;&gt;
+                        {ReactElementFactory(colors)({sizes, offsets, handleChange: this.handleChange, handleRemove: this.handleRemove})(ReactColorElementMaker)}
+                    &lt;/Row&gt;
+                    {hasAnyIdea &amp;&amp; &lt;Row&gt;&lt;Button type=&quot;button&quot; size=&quot;small&quot; variant=&quot;raised&quot; name=&quot;colors&quot; onClick={this.handleAdd}&gt;Add Color&lt;/Button&gt;&lt;/Row&gt;}
+
+                    &lt;Row&gt;{images &amp;&amp; images.length ? (&lt;legend&gt;Images&lt;/legend&gt;) : false}&lt;/Row&gt;
+                    &lt;Row className=&quot;center&quot;&gt;
+                        &lt;S3UploaderFromDroppedFiles AWS={this.props.route.AWS} toolkitId={id} onDrop={this.onNewImageDropped} done={this.onS3UploadedFiles}&gt;
+                            {ReactElementFactory(images)({sizes, offsets, handleChange: this.handleChange, handleRemove: this.handleRemove})(ReactImageElementMaker)}
+                        &lt;/S3UploaderFromDroppedFiles&gt;
+                    &lt;/Row&gt;
+                    {/*hasAnyIdea &amp;&amp; &lt;Row&gt;&lt;Button type=&quot;button&quot; size=&quot;small&quot; variant=&quot;raised&quot; name=&quot;images&quot; onClick={this.handleAdd}&gt;Add Image&lt;/Button&gt;&lt;/Row&gt;*/}
+
+                    &lt;Row&gt;{fonts &amp;&amp; fonts.length ? (&lt;legend&gt;Fonts&lt;/legend&gt;) : false}&lt;/Row&gt;
+                    &lt;Row className=&quot;center&quot;&gt;
+                        {ReactElementFactory(fonts)({sizes, offsets, handleChange: this.handleChange, handleRemove: this.handleRemove})(ReactFontElementMaker)}
+                    &lt;/Row&gt;
+                    {/*hasAnyIdea &amp;&amp; &lt;Button type=&quot;button&quot; size=&quot;small&quot; variant=&quot;raised&quot; name=&quot;fonts&quot; onClick={this.handleAdd}&gt;Add Font&lt;/Button&gt;*/}
+
+                    &lt;Row className=&quot;center&quot;&gt;
+                        {hasAnyIdea &amp;&amp; (
+                            &lt;div&gt;
+                                &lt;Button type=&quot;button&quot; size=&quot;small&quot; variant=&quot;raised&quot; onClick={this.handleSave}&gt;Save&lt;/Button&gt;
+                                &lt;Button type=&quot;button&quot; size=&quot;small&quot; variant=&quot;raised&quot; onClick={this.props.handleReset}&gt;Reset&lt;/Button&gt;
+                            &lt;/div&gt;
+                        )}
+                    &lt;/Row&gt;
+                &lt;/Col&gt;
+            &lt;/Row&gt;
+        );
+    }
+}
+
+ToolkitForm.propTypes = createPropTypes(toolkitSchema);
+
+export default ToolkitForm</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ cyclomatic }} <br>
+    Length : {{ halstead.length }} <br>
+    Difficulty : {{ halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

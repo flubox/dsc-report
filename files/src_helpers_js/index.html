@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - src/helpers.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>src/helpers.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">82.78</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">112</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">32.85</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">1.52</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">import uuidV4 from &#039;uuid/v4&#039;;
+import _ from &#039;lodash&#039;;
+const designSchema = require(&#039;./schemas/design.json&#039;);
+import md5 from &#039;blueimp-md5&#039;;
+
+export const merge = object =&gt; (a, k) =&gt; _.merge(a, {[k]: object[k]});
+
+export const excludeFunctionsFromProps = props =&gt; Object.keys(props).filter(key =&gt; typeof props[key] !== &#039;function&#039;).reduce(merge(props), {});
+
+/**
+ * Adds uuid property to an array to identify itself with React
+ * @param {Array} array - iterable on which we will add uuid property
+ * @returns {Oject} item - new item with uuid
+ */
+export const addUuidToArray = array =&gt; array &amp;&amp; array.map(item =&gt; {
+    item.uuid = item.uuid || uuidV4();
+    Object.keys(item).forEach(key =&gt; {
+        if (Array.isArray(item[key]) &amp;&amp; typeof item[key][0] === &#039;object&#039;) {
+            item[key] = addUuidToArray(item[key]);
+        }
+    });
+    return item;
+});
+
+/**
+ * Recursive function to remove uuid in object
+ * @param {Object} data - Object of datas
+ * @returns {Object} data - new Object without uuids
+ */
+export const removeUuids = data =&gt; {
+    Object.keys(data).forEach(key =&gt; {
+        if (key === &#039;uuid&#039;) {
+            delete data[key];
+        } else if (typeof data[key] === &#039;object&#039;) {
+            removeUuids(data[key]);
+        }
+    })
+    return data;
+}
+
+export const ReactElementFactory = list =&gt; addedProps =&gt; elementMaker =&gt; list &amp;&amp; list.map(elementMaker(addedProps));
+
+export const extractFromEvent = ({target}) =&gt; ({id: target.id, name: target.name, value: target.value});
+
+export const responseToJson = response =&gt; response.json();
+
+export const responseToText = response =&gt; response.text();
+
+/**
+ * Recursive method to change data based on its uuid
+ * @param {Object} object
+ * @param {Object} target
+ * @returns {Object} new state
+ */
+export const isObject = data =&gt; data &amp;&amp; data.constructor.name.toLowerCase() === typeof data &amp;&amp; typeof data === &#039;object&#039;;
+
+export const handleChange = object =&gt; ({target}) =&gt; {
+    const {id, name, value} = target;
+    if (id === object.uuid) {
+        return _.merge(object, {[name]: value});
+    }
+    return Object.keys(object).map(key =&gt; {
+        if (Array.isArray(object[key])) {
+            if (object[key].some(({uuid}) =&gt; uuid === id)) {
+                return {[key]: object[key].map(each =&gt; {
+                    return each.uuid === id ? ({...each, [name]: value}) : each;
+                })}
+            }
+            return {[key]: object[key].map(each =&gt; handleChange(each)({target}))}
+        }
+
+        if (isObject(object[key])) {
+            return {[key]: handleChange(object[key])({target})};
+        }
+        return {[key]: object[key]};
+    }).reduce(_.merge, {});
+};
+
+export const handleDrop = props =&gt; file =&gt; new Promise(resolve =&gt; fetch(file.preview).then(responseToText).then(resolve));
+
+// export const handleDesignDrop = config =&gt; file =&gt; {
+export const handleDesignDrop = ({ api, env }) =&gt; body =&gt; {
+    return Array.isArray(body) ? handleDesignDrop({api, env})(body[0]) :
+    new Promise(resolve =&gt; {
+        // const { api, env } = config;
+        // const url = `${api.root[env]}${api.parsing.POST}`;
+        const url = &#039;http://localhost:3003&#039;;
+        console.info(&#039;handleDesignDrop&#039;, api, env, body);
+        const headers = new Headers({mode: &#039;cors&#039;});
+        headers.append(&#039;Content-Type&#039;, &#039;application/json&#039;);
+        fetch(url, body, headers).then(response =&gt; response.json())
+        .then(data =&gt; resolve({then: resolve =&gt; resolve(data)}));
+    });
+};
+
+export const handleToolkitDrop = ({AWS, parser}) =&gt; file =&gt; {
+    return new Promise(resolve =&gt;  handleDrop({AWS, parser})(file).then(response =&gt; {
+        const S3 = new AWS.S3();
+        const loader = document.createElement(&#039;div&#039;);
+        loader.innerHTML = response;
+        const options = { filename: file.name, S3, hashMethod: &#039;md5&#039;, hashFunction: md5 };
+        parser(loader.firstElementChild)(options).then(resolve);
+    }));
+};
+export const covers = Object.values(designSchema.properties.pageDescs.items.properties.pageType.enum);
+
+/**
+ * Tests if the design data passed is a book or not
+ * @param {Object} object - the design data object
+ * @returns {Boolean}
+ */
+export const isBook = object =&gt; object &amp;&amp; object.pageDescs &amp;&amp; object.pageDescs.some(key =&gt; covers.includes(key.pageType));</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ cyclomatic }} <br>
+    Length : {{ halstead.length }} <br>
+    Difficulty : {{ halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>
