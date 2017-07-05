@@ -51,7 +51,7 @@
     </div>
     <div class="col-md-6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
-      <p class="stat">178</p>
+      <p class="stat">181</p>
     </div>
   </div>
   <div class="row historical">
@@ -65,11 +65,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
-      <p class="stat">18.78</p>
+      <p class="stat">20.05</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
-      <p class="stat">1.19</p>
+      <p class="stat">1.25</p>
     </div>
   </div>
 </div>
@@ -249,8 +249,11 @@ export const filterKeys = blackListedKeys =&gt; object =&gt; Object.keys(object)
  * @param {Object} composedId - desctructured object of {pageNumber, pageType, pageId}
  * @return {String} the new concatenated pageDescId
  */
-export const createPageDescId = ({name, value}) =&gt; (composedId) =&gt; {
-    composedId[name] = value;
+export const createPageDescId = (key, value) =&gt; (composedId) =&gt; {
+    composedId[key] = value;
+    Object.keys(composedId).forEach(key =&gt; {
+        composedId[key] = composedId[key] === undefined ? &#039;null&#039; : composedId[key];
+    });
     return Object.values(composedId).join(&#039;_&#039;);
 };
 

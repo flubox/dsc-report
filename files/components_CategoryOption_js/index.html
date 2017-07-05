@@ -47,11 +47,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
-      <p class="stat">100.00</p>
+      <p class="stat">72.63</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
-      <p class="stat">42</p>
+      <p class="stat">118</p>
     </div>
   </div>
   <div class="row historical">
@@ -65,11 +65,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
-      <p class="stat">15.57</p>
+      <p class="stat">31.20</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
-      <p class="stat">0.37</p>
+      <p class="stat">1.07</p>
     </div>
   </div>
 </div>
@@ -93,44 +93,120 @@
 <div class="container">
   <div class="row">
     <textarea id="file-source" class="col-md-12">import React, { PropTypes } from &#039;react&#039;;
-import { Col, Row, Input, Card, Button, Icon } from &#039;react-materialize&#039;
+import _ from &#039;lodash&#039;;
+import { filterKeys, blackListedKeys } from &#039;../helpersDesignForm&#039;;
+import { addUuidToArray } from &#039;../helpers&#039;;
+import { Col, Row, Input, Card, Button, Icon, Collapsible, CollapsibleItem } from &#039;react-materialize&#039;
 
-export const CategoryOption = props =&gt; (
-    &lt;Col s={12} m={6}&gt;
-        &lt;Card title=&#039;Category option&#039;&gt;
-            &lt;Row&gt;
-                &lt;Input s={12} label=&quot;Category Id&quot; name=&quot;categoryId&quot; id={props.uuid} value={props.categoryId} onChange={props.handleChange} /&gt;
-                &lt;Row&gt;
-                    &lt;Button floating small className=&#039;red&#039; waves=&#039;light&#039; name=&#039;options&#039; id={props.uuid} onClick={props.handleAddCategoryOptions}&gt;+&lt;Icon left&gt;add&lt;/Icon&gt;&lt;/Button&gt;
-                &lt;/Row&gt;
-                
-                &lt;Row&gt;
-                    {props.options &amp;&amp; props.options.map(option =&gt; (
-                        &lt;Col s={12} m={6} key={`categoryOptions_${option.uuid}`}&gt;
-                            &lt;Card title=&#039;Options&#039;&gt;
-                                &lt;Input s={4} label=&#039;Id&#039; name=&#039;id&#039; id={option.uuid} value={option.id} onChange={props.handleChange} /&gt;
-                                &lt;Input s={4} label=&#039;Name&#039; name=&#039;name&#039; id={option.uuid} value={option.name} onChange={props.handleChange} /&gt;
-                                &lt;Input s={4} label=&#039;Value&#039; name=&#039;value&#039; id={option.uuid} value={option.value} onChange={props.handleChange} /&gt;
-                                &lt;Button waves=&#039;light&#039; name=&#039;options&#039; id={option.uuid} onClick={props.handleRemoveOptions} &gt;-&lt;/Button&gt;
-                            &lt;/Card&gt;
-                        &lt;/Col&gt;
-                    ))}
-                &lt;/Row&gt;
+export const Option = props =&gt; {
+    const handleChange = ({target}) =&gt; {
+        const { name, value } = target;
+        const newChild = ({...props, [name]: value});
+        props.handleChange({data: newChild, key: name, value: value});
+    }
 
-                &lt;Button s={12} waves=&#039;light&#039; className=&#039;red&#039; name=&#039;categoryOptions&#039; id={props.uuid} onClick={props.handleRemove}&gt;Remove this item&lt;/Button&gt;
-            &lt;/Row&gt;
-        &lt;/Card&gt;
-    &lt;/Col&gt;
-)
+    const handleRemove = ({target}) =&gt; {
+        const { id } = target.parentElement;
+        props.handleRemoveOptions({target: {id}});
+    }
+
+    return (
+        &lt;Collapsible&gt;
+            &lt;CollapsibleItem header=&#039;Options&#039;&gt;
+                &lt;Row&gt;
+                    &lt;Col s={12} key={`categoryOptions_${props.uuid}`}&gt;
+                        &lt;Input s={12} type=&#039;number&#039; min=&#039;0&#039; label=&#039;Id&#039; name=&#039;id&#039; id={props.uuid} value={props.id} onChange={handleChange} /&gt;
+                        &lt;Input s={12} label=&#039;Name&#039; name=&#039;name&#039; id={props.uuid} value={props.name} onChange={handleChange} /&gt;
+                        &lt;Input s={12} label=&#039;Value&#039; name=&#039;value&#039; id={props.uuid} value={props.value} onChange={handleChange} /&gt;
+                        &lt;Button waves=&#039;light&#039; name=&#039;options&#039; id={props.uuid} onClick={handleRemove} &gt;-&lt;/Button&gt;
+                    &lt;/Col&gt;
+                &lt;/Row&gt;
+            &lt;/CollapsibleItem&gt;
+        &lt;/Collapsible&gt;
+    )
+};
+
+Option.propTypes = {
+    uuid: PropTypes.string,
+    id: PropTypes.string,
+    name: PropTypes.string,
+    value: PropTypes.string
+}
+
+export const CategoryOption = props =&gt; {
+    const handleChange = ({target}) =&gt; {
+        const { name, value } = target;
+        const newChild = ({...props, [name]: value});
+        props.handleChange({data: newChild, key: name, value: value});
+    }
+
+    const handleChangeOptions = ({data}) =&gt; {
+        const newOptions = props.options.map(item =&gt; {
+            if (item.uuid === data.uuid) {
+                return data;
+            }
+            return item;
+        });
+        props.handleChangeOptions({data: newOptions, index: props.index});
+    }
+
+    const handleAddCategoryOption = () =&gt; {
+        const newOption = addUuidToArray(props.options.slice(0,1).map(filterKeys(blackListedKeys)));
+        props.handleChangeOptions({
+            data: props.options.concat(_.cloneDeep(newOption)),
+            index: props.index
+        });
+    }
+
+    const handleRemove = ({target}) =&gt; {
+        const {id} = target;
+        props.handleChangeOptions({
+            data: props.options.filter(item =&gt; item.uuid !== id),
+            index: props.index
+        })
+    }
+
+    const handleRemoveOptions = ({target}) =&gt; {
+        const { id } = target;
+        props.handleChangeOptions({
+            data: props.options.filter(item =&gt; item.uuid !== id),
+            index: props.index
+        });
+    }
+
+    return (
+        &lt;Col s={12} m={6}&gt;
+            &lt;Card title=&#039;Category option&#039;&gt;
+                &lt;Row&gt;
+                    &lt;Input s={12} label=&quot;Category Id&quot; name=&quot;categoryId&quot; id={props.uuid} value={props.categoryId} onChange={handleChange} /&gt;
+                    &lt;Row&gt;
+                        &lt;Button floating small className=&#039;red&#039; waves=&#039;light&#039; name=&#039;options&#039; id={props.uuid} onClick={handleAddCategoryOption}&gt;+&lt;Icon left&gt;add&lt;/Icon&gt;&lt;/Button&gt;
+                    &lt;/Row&gt;
+                    
+                    &lt;Row&gt;
+                        {props.options &amp;&amp; props.options.map((option, i) =&gt;
+                            (&lt;Option
+                                {...option}
+                                handleChange={handleChangeOptions}
+                                handleRemoveOptions={handleRemoveOptions}
+                                key={`Option-${i}`} /&gt;))}
+                    &lt;/Row&gt;
+
+                    &lt;Button s={12} waves=&#039;light&#039; className=&#039;red&#039; name=&#039;categoryOptions&#039; id={props.uuid} onClick={handleRemove}&gt;Supprimer&lt;/Button&gt;
+                &lt;/Row&gt;
+            &lt;/Card&gt;
+        &lt;/Col&gt;
+    )
+}
 
 CategoryOption.propTypes = {
-    uuid: PropTypes.string.isRequired,
-    categoryId: PropTypes.string.isRequired,
-    options: PropTypes.array.isRequired,
-    handleChange: PropTypes.func.isRequired,
-    handleAddCategoryOptions: PropTypes.func.isRequired,
-    handleRemove: PropTypes.func.isRequired,
-    handleRemoveOptions: PropTypes.func.isRequired
+    uuid: PropTypes.string,
+    categoryId: PropTypes.string,
+    options: PropTypes.array,
+    handleChange: PropTypes.func,
+    handleAddCategoryOptions: PropTypes.func,
+    handleRemove: PropTypes.func,
+    handleRemoveOptions: PropTypes.func
 };
 
 export default CategoryOption;</textarea>

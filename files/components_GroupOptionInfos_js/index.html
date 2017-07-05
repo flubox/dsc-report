@@ -47,11 +47,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
-      <p class="stat">100.00</p>
+      <p class="stat">76.48</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
-      <p class="stat">24</p>
+      <p class="stat">58</p>
     </div>
   </div>
   <div class="row historical">
@@ -65,11 +65,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
-      <p class="stat">13.80</p>
+      <p class="stat">22.61</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
-      <p class="stat">0.20</p>
+      <p class="stat">0.45</p>
     </div>
   </div>
 </div>
@@ -92,27 +92,61 @@
 
 <div class="container">
   <div class="row">
-    <textarea id="file-source" class="col-md-12">import React, { PropTypes } from &#039;react&#039;
-import { Col, Row, Input, Card } from &#039;react-materialize&#039;
+    <textarea id="file-source" class="col-md-12">import React, { PropTypes } from &#039;react&#039;;
+import { Col, Row, Input, Card, Button, Icon, Collapsible, CollapsibleItem } from &#039;react-materialize&#039;
 
-export const GroupOptionInfos = props =&gt; (
-    &lt;Col s={12} m={3}&gt;
-        &lt;Card title=&#039;GroupOptionInfos&#039;&gt;
+export const GroupOptionInfo = props =&gt; {
+    const handleChange = ({target}) =&gt; {
+        const { name, value } = target;
+        const newChild = ({...props, [name]: value});
+        props.handleChange({data: newChild, key: name, value: value});
+    }
+
+    return (
+        &lt;Col s={12} m={3}&gt;
+            &lt;Collapsible&gt;
+                &lt;CollapsibleItem header=&#039;GroupOptionInfos&#039;&gt;
+                    &lt;Row&gt;
+                        &lt;Col s={12} key={`GroupOptionInfos_${props.uuid}`}&gt;
+                            &lt;Input s={12} label=&#039;groupId&#039; name=&#039;groupId&#039; id={props.uuid} value={props.groupId} onChange={handleChange} /&gt;
+                            &lt;Input s={12} type=&#039;select&#039; label=&#039;optionsId&#039; name=&#039;optionsId&#039; id={props.uuid} onChange={handleChange} &gt;
+                                {props.optionsId.length &amp;&amp; props.optionsId &amp;&amp; props.optionsId.map((option, i) =&gt; (&lt;option key={`optionsId_${i}`} label={option} value={option}&gt;{option}&lt;/option&gt;))}
+                            &lt;/Input&gt;
+                        &lt;/Col&gt;
+                    &lt;/Row&gt;
+                &lt;/CollapsibleItem&gt;
+            &lt;/Collapsible&gt;
+        &lt;/Col&gt;
+    )
+}
+
+export const GroupOptionInfos = props =&gt; {
+    const handleChange = ({data}) =&gt; {
+        const newData = props.data.map(item =&gt; {
+            if (item.uuid === data.uuid) {
+                return data;
+            }
+            return item;
+        });
+        props.handleChange({data: newData, key: &#039;groupOptionInfos&#039;});
+    }
+
+    return (
+        &lt;CollapsibleItem header={`GroupOptionInfos ${props.data.length}`}&gt;
             &lt;Row&gt;
-                &lt;Input s={12} label=&#039;groupId&#039; name=&#039;groupId&#039; id={props.uuid} value={props.groupId} onChange={props.handleChange} /&gt;
-                &lt;Input s={12} type=&#039;select&#039; label=&#039;optionsId&#039; name=&#039;optionsId&#039; id={props.uuid} onChange={props.handleChange} &gt;
-                    {props.optionsId.length &amp;&amp; props.optionsId &amp;&amp; props.optionsId.map((option, i) =&gt; (&lt;option key={`optionsId_${i}`} label={option} value={option}&gt;{option}&lt;/option&gt;))}
-                &lt;/Input&gt;
+                &lt;Col s={12}&gt;
+                    {props.data.map((item, index) =&gt; (&lt;GroupOptionInfo {...item} index={index} handleChange={handleChange} /&gt;))}
+                &lt;/Col&gt;
             &lt;/Row&gt;
-        &lt;/Card&gt;
-    &lt;/Col&gt;
-)
+        &lt;/CollapsibleItem&gt;
+    )
+}
 
 GroupOptionInfos.propTypes = {
-    uuid: PropTypes.string.isRequired,
-    groupId: PropTypes.string.isRequired,
-    optionsId: PropTypes.array.isRequired,
-    handleChange: PropTypes.func.isRequired
+    uuid: PropTypes.string,
+    groupId: PropTypes.string,
+    optionsId: PropTypes.array,
+    handleChange: PropTypes.func
 }
 
 export default GroupOptionInfos</textarea>

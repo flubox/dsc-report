@@ -47,11 +47,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
-      <p class="stat">69.36</p>
+      <p class="stat">69.68</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
-      <p class="stat">472</p>
+      <p class="stat">256</p>
     </div>
   </div>
   <div class="row historical">
@@ -65,11 +65,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
-      <p class="stat">58.32</p>
+      <p class="stat">41.49</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
-      <p class="stat">4.36</p>
+      <p class="stat">2.37</p>
     </div>
   </div>
 </div>
@@ -98,27 +98,23 @@ import _ from &#039;lodash&#039;;
 import autobind from &#039;autobind-decorator&#039;;
 import designSchema from &#039;../schemas/design.json&#039;;
 import { Row, Col, Button, Icon, Collapsible, CollapsibleItem } from &#039;react-materialize&#039;
-import { addUuidToArray, excludeFunctionsFromProps, handleChange } from &#039;../helpers&#039;;
+import { addUuidToArray, excludeFunctionsFromProps } from &#039;../helpers&#039;;
 import uuidV4 from &#039;uuid/v4&#039;;
 import {
     newDesignElements,
-    newGroupDescInfos,
     newSequenceInfos,
-    createPageDescId,
-    newCategoryOptionsOptions,
     factory,
-    instancierPageDesc,
-    instancierCategoryOptions,
-    instancierGroupDescs,
-    instancierGroupOptionInfos,
     instancierSequences,
-    instancierCovers,
     filterPagesWithoutCovers } from &#039;../helpersDesignForm&#039;;
-import NameIdToolkit from &#039;../components/NameIdToolkit&#039;
-import { RoleSelect } from &#039;../components/RoleSelect&#039;
-import { FetchAltPagesService } from &#039;../services/FetchAltPagesService&#039;
-import { api, env } from &#039;../../config.json&#039;
-import AltPage from &#039;../components/AltPage&#039;
+import NameIdToolkit from &#039;../components/NameIdToolkit&#039;;
+import { RoleSelect } from &#039;../components/RoleSelect&#039;;
+import { api, env } from &#039;../../config.json&#039;;
+import PageDescs from &#039;../components/PageDescs&#039;;
+import Covers from &#039;../components/Covers&#039;;
+import AltPages from &#039;../components/AltPages&#039;;
+import CategoryOptions from &#039;../components/CategoryOptions&#039;;
+import GroupDescs from &#039;../components/GroupDescs&#039;;
+import GroupOptionInfos from &#039;../components/GroupOptionInfos&#039;;
 
 export const addUuid = design =&gt; ({
     ...design,
@@ -173,110 +169,20 @@ class DesignForm extends Component {
     }
 
     /**
-     * Adds an entry in the groupDescInfo array in a groupDescs item
-     * @param {object} target
-     */
-    handleAddGroupDescsOptions ({ target }) {
-        const { id, name } = target.name ? target : target.parentNode;
-        this.setState({
-            data: {
-                ...this.state.data,
-                groupDescs: this.state.data.groupDescs.map(item =&gt; {
-                    const groupDescInfo = addUuidToArray([...item.groupDescInfos, _.cloneDeep({...newGroupDescInfos})]);
-                    if (item.uuid === id) {
-                        return {...item, [name]: groupDescInfo};
-                    }
-                    return item;
-                })
-            }
-        })
-    }
-
-    /**
      * Adds/updates the design properties target by its key
      * @param {Object} key - key of the property
      */
-    handleChange ({target}) {
-        this.setState({data: handleChange(this.state.data)({target})});
+    // handleChange ({target}) {
+    handleChange ({data, key}) {
+        this.setState({data: {...this.state.data, [key]: data}});
     }
 
     /**
-     * Handles designId input changes
      * Toggles button action to clone when the id is changed
-     * @param {Object} target - the target html element
+     * @param {Boolean} idHasChanged - the design ID input has been changed or not
      */
-    handleChangeDesignId ({target}) {
-        const {name, value} = target;
-        const {id} = this.state;
-        const idHasChanged = id !== value;
-        this.setState({
-            ...this.state,
-            data: {...this.state.data, [name]: value},
-            buttons: {action: idHasChanged ? &#039;clone&#039; : &#039;save&#039;}
-        });
-    }
-
-    /**
-     * Removes the design properties target by its key
-     * @param {String} key - key of the property
-     * @param {Object} object - Property object
-     */
-    handleRemove ({target}) {
-        const { id, name } = target.name ? target : target.parentNode;
-        this.setState({
-            ...this.state,
-            data: {
-                ...this.state.data,
-                [name]: this.state.data[name].filter(a =&gt; id !== a.uuid)
-            }
-        });
-    }
-
-    /**
-     * Updates the pageDescs properties: pageNumber, pageType, pageId and the composedId
-     * @param {Object} target - the HTML target element
-     */
-    handleChangePageDescs ({target}) {
-        const {name, value} = target;
-        const id = target.id || target.parentElement.id;
-
-        this.setState({
-            ...this.state,
-            data: {
-                ...this.state.data,
-                pageDescs: this.state.data.pageDescs.map(item =&gt; {
-                    let { pageNumber, pageType, pageId } = item;
-                    if (item.uuid === id) {
-                        return {
-                            ...item,
-                            [name]: (name === &#039;pageNumber&#039; || name === &#039;pageId&#039;) ? parseInt(value) : value,
-                            id: createPageDescId(target)({ pageNumber, pageType, pageId })
-                        }
-                    }
-                    return item;
-                })
-            }
-        });
-    }
-
-    /**
-     * Adds an entry in the options array in a categoryOption item
-     * @param {object} target
-     */
-    handleAddCategoryOptions ({ target }) {
-        const { id, name } = target.name ? target : target.parentNode;
-        this.setState({
-            data: {
-                ...this.state.data,
-                categoryOptions: this.state.data.categoryOptions.map(item =&gt; {
-                    const options = addUuidToArray([...item.options, _.cloneDeep({...newCategoryOptionsOptions})]);
-                    if (item.uuid === id) {
-                        return {...item, [name]: options};
-                    }
-                    return item;
-                })
-            }
-        })
+    toggleCloneButton (idHasChanged) {
+        this.setState({buttons: {action: idHasChanged ? &#039;clone&#039; : &#039;save&#039;}})
     }
 
     /**
@@ -315,50 +221,6 @@ class DesignForm extends Component {
             clone: () =&gt; this.props.handleClone(this.state.data)
         };
         handleActionsSelector[this.state.buttons.action]();
-    }
-
-    /**
-     * Remove a groupDescInfo option item in a groupDesc item
-     * @param {Object} target
-     */
-
-
-    handleRemoveGroupDescInfo ({ target }) {
-        const { id } = target.name ? target : target.parentNode;
-        this.setState({
-            data: {
-                ...this.state.data,
-                groupDescs: this.state.data.groupDescs.map(groupdesc =&gt; {
-                    return {
-                        ...groupdesc,
-                        groupDescInfos: groupdesc.groupDescInfos.filter(groupDescInfo =&gt; {
-                            return groupDescInfo.uuid !== id
-                        })
-                    }
-                })
-            }
-        })
-    }
-
-    /**
-     * Remove a groupDescInfo option item in a groupDesc item
-     * @param {Object} target
-     */
-    handleRemoveOptionsAmongstCategoryOptions ({ target }) {
-        const { id } = target.name ? target : target.parentNode;
-        this.setState({
-            data: {
-                ...this.state.data,
-                categoryOptions: this.state.data.categoryOptions.map(categoryOption =&gt; {
-                    return {
-                        ...categoryOption,
-                        options: categoryOption.options.filter(a =&gt; {
-                            return a.uuid !== id
-                        })
-                    }
-                })
-            }
-        })
     }
 
     /**
@@ -418,47 +280,9 @@ class DesignForm extends Component {
      */
     getHandlers () {
         return {
-            // handleChange: this.handleChange,
-            handleChangePageDescs: this.handleChangePageDescs,
-            handleChangeAltPages: this.handleChangeAltPages,
-            handleRemove: this.handleRemove,
-            handleChangeCategoryOptionProperties: this.handleChangeCategoryOptionProperties,
-            openPageForm: this.afterOpenModal
+            handleChange: this.handleChange,
+            handleChangeAltPages: this.handleChangeAltPages
         }
-    }
-
-    /**
-     * Getter for GroupDescs handlers
-     * @returns {Object} - Handlers
-     */
-    getGroupDescsHandlers () {
-        return {
-            pageDescIds: this.state.pageDescIds,
-            handleChange: this.handleChange,
-            handleRemove: this.handleRemove,
-            handleAddGroupDescsOptions: this.handleAddGroupDescsOptions,
-            handleRemoveGroupDescInfo: this.handleRemoveGroupDescInfo
-        };
-    }
-
-    /**
-     * Getter for CategoryOptions handlers
-     * @returns {Object} - Handlers
-     */
-    getCategoryOptionsHandlers () {
-        return {
-            handleChange: this.handleChange,
-            handleRemoveOptions: this.handleRemoveOptionsAmongstCategoryOptions,
-            handleAddCategoryOptions: this.handleAddCategoryOptions,
-            handleRemove: this.handleRemove
-        };
-    }
-
-    getGroupOptionInfosHandlers () {
-        return {
-            handleChange: this.handleChange,
-            handleRemove: this.handleRemove
-        };
     }
 
     getSequenceHandlers () {
@@ -478,7 +302,7 @@ class DesignForm extends Component {
     render () {
         const {uuid, name, id, toolkitIds, pageRepeatables, pageDescs, categoryOptions, groupDescs, groupOptionInfos, sequences} = this.state.data;
         const {action} = this.state.buttons;
-        const { altPages, isOperator } = this.state;
+        const { altPages, isOperator, covers, fetchAltPagesUrl } = this.state;
         return (
             &lt;Row&gt;
                 &lt;Col s={10} offset=&#039;s1&#039;&gt;&lt;RoleSelect  handleChange={this.handleChangeRole} /&gt;&lt;/Col&gt;
@@ -486,60 +310,20 @@ class DesignForm extends Component {
                 {this.state.ui.loading ? (&lt;Row&gt;&lt;h4&gt;Loading in progress ...&lt;/h4&gt;&lt;/Row&gt;) : (
                     &lt;Col s={10} offset=&#039;s1&#039;&gt;
                         &lt;Collapsible popout defaultActiveKey&gt;
-                            &lt;CollapsibleItem header=&#039;Design&#039;&gt;
-                                &lt;Row&gt;
-                                    &lt;NameIdToolkit {...{uuid, name, id, toolkitIds, pageRepeatables}} handleChange={this.handleChange} handleChangeDesignId={this.handleChangeDesignId} /&gt;
-                                &lt;/Row&gt;
-                            &lt;/CollapsibleItem&gt;
+                            &lt;NameIdToolkit {...{uuid, name, id, toolkitIds, pageRepeatables}} handleChange={this.handleChange} handleChangeDesignId={this.handleChangeDesignId} toggleCloneButton={this.toggleCloneButton} /&gt;
 
-                            {this.state.covers &amp;&amp; (
-                                &lt;CollapsibleItem header={`Covers ${this.state.covers.length}`}&gt;
-                                    &lt;Row&gt;
-                                        {factory(this.state.covers)({...this.getHandlers()})(instancierCovers)}
-                                    &lt;/Row&gt;
-                                &lt;/CollapsibleItem&gt;
-                            )}
+                            &lt;Covers data={covers} /&gt;
 
-                            &lt;CollapsibleItem header={`Page description ${filterPagesWithoutCovers(this.state.isBook)(pageDescs).length}`}&gt;
-                                &lt;Row&gt;
-                                    &lt;Col s={12}&gt;{pageDescs.length &gt; 0 &amp;&amp; (&lt;Button onClick={this.handleAdd} name=&#039;pageDescs&#039; waves=&#039;light&#039;&gt;&lt;Icon left&gt;add&lt;/Icon&gt;Add pageDescs&lt;/Button&gt;)}&lt;/Col&gt;
-                                    &lt;Col s={12} m={8} offset=&#039;m2&#039;&gt;
-                                        {factory(filterPagesWithoutCovers(this.state.isBook)(pageDescs))({...this.getHandlers()})(instancierPageDesc)}
-                                    &lt;/Col&gt;
-                                &lt;/Row&gt;
-                            &lt;/CollapsibleItem&gt;
+                            &lt;PageDescs data={pageDescs} pageRepeatables={pageRepeatables} handleChange={this.handleChange}  handleChangeAltPages={this.handleChangeAltPages} /&gt;
 
-                            &lt;CollapsibleItem header={`Alt pages ${altPages.length}`}&gt;
-                                &lt;FetchAltPagesService url={this.state.fetchAltPagesUrl} data={this.state.altPages} done={this.fetchAltPages} &gt;
-                                    &lt;Row&gt;
-                                        {altPages &amp;&amp; (altPages.map((item, index) =&gt; &lt;AltPage key={`altPage_${index}`} {...item} isOperator={isOperator} /&gt;))}
-                                    &lt;/Row&gt;
-                                &lt;/FetchAltPagesService&gt;
-                            &lt;/CollapsibleItem&gt;
+                            &lt;AltPages url={fetchAltPagesUrl} data={altPages} done={this.fetchAltPages} isOperator={isOperator} /&gt;
 
-                            {this.state.isOperator &amp;&amp; (
-                                &lt;CollapsibleItem header={`Category options ${categoryOptions.length}`}&gt;
-                                    &lt;Row&gt;
-                                        {categoryOptions.length &gt; 0 &amp;&amp; (&lt;Button onClick={this.handleAdd} name=&#039;categoryOptions&#039; waves=&#039;light&#039;&gt;&lt;Icon left&gt;add&lt;/Icon&gt;Add categoryOptions&lt;/Button&gt;)}
-                                        {factory(categoryOptions)({...this.getCategoryOptionsHandlers()})(instancierCategoryOptions)}
-                                    &lt;/Row&gt;
-                                &lt;/CollapsibleItem&gt;
-                            )}
-                            {this.state.isOperator &amp;&amp; (
-                                &lt;CollapsibleItem header={`Group Descs ${groupDescs.length}`}&gt;
-                                    &lt;Row&gt;
-                                        {groupDescs.length &gt; 0 &amp;&amp; (&lt;Button onClick={this.handleAdd} name=&#039;groupDescs&#039; variant=&quot;raised&quot;&gt;Add groupDescs&lt;/Button&gt;)}
-                                        {factory(groupDescs)({...this.getGroupDescsHandlers()})(instancierGroupDescs)}
-                                    &lt;/Row&gt;
-                                &lt;/CollapsibleItem&gt;
-                            )}
-                            {this.state.isOperator &amp;&amp; (
-                                &lt;CollapsibleItem header={`Group Option Infos ${groupOptionInfos.length}`}&gt;
-                                    &lt;Row&gt;
-                                        {factory(groupOptionInfos)({...this.getGroupOptionInfosHandlers()})(instancierGroupOptionInfos)}
-                                    &lt;/Row&gt;
-                                &lt;/CollapsibleItem&gt;
-                            )}
+                            {this.state.isOperator &amp;&amp; (&lt;CategoryOptions data={categoryOptions} handleChange={this.handleChange} /&gt;)}
+
+                            {this.state.isOperator &amp;&amp; (&lt;GroupDescs data={groupDescs} handleChange={this.handleChange} /&gt;)}
+
+                            {this.state.isOperator &amp;&amp; (&lt;GroupOptionInfos data={groupOptionInfos} handleChange={this.handleChange} /&gt;)}
+
                             &lt;CollapsibleItem header={`Sequences ${sequences.length}`}&gt;
                                 &lt;Row&gt;
                                     {sequences.length &gt; 0 &amp;&amp; (&lt;Button waves=&#039;light&#039; onClick={this.handleAdd} name=&#039;sequences&#039;&gt;&lt;Icon left&gt;add&lt;/Icon&gt;Add Sequence&lt;/Button&gt;)}
