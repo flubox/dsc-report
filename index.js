@@ -7,7 +7,7 @@ const package = require(path.resolve(filename, 'package.json'));
 
 //be sure and set your src, output, and any options. 
 let src = path.resolve(filename, 'src/**/*.js');
-let outputDir = path.resolve(__dirname, './');
+let outputDir = path.resolve(__dirname, './docs');
 
 let platoArgs = {
 title: package.name,
