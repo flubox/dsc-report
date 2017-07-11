@@ -47,11 +47,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
-      <p class="stat">77.09</p>
+      <p class="stat">72.73</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
-      <p class="stat">69</p>
+      <p class="stat">81</p>
     </div>
   </div>
   <div class="row historical">
@@ -65,11 +65,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
-      <p class="stat">11.53</p>
+      <p class="stat">20.75</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
-      <p class="stat">0.29</p>
+      <p class="stat">0.58</p>
     </div>
   </div>
 </div>
@@ -95,59 +95,70 @@
     <textarea id="file-source" class="col-md-12">import React, {PropTypes} from &#039;react&#039;;
 import toolkitSchema from &#039;../schemas/toolkit.json&#039;;
 // import createPropTypes from &#039;react-json-schema-proptypes&#039;;
-
-// import Col from &#039;muicss/lib/react/col&#039;;
-// import Input from &#039;muicss/lib/react/input&#039;;
-// import Option from &#039;muicss/lib/react/option&#039;;
-// import Panel from &#039;muicss/lib/react/panel&#039;;
-// import Select from &#039;muicss/lib/react/select&#039;;
-// import TextArea from &#039;muicss/lib/react/textarea&#039;;
-// import Button from &#039;muicss/lib/react/button&#039;;
 import { Button, Card, CardTitle, Col, Container, MediaBox, Input, Icon, Row } from &#039;react-materialize&#039;
 
-export const ToolkitFormColor = ({color, handleChange, handleRemove}) =&gt; {
+const loCaz = ({value}) =&gt; value.toLowerCase();
+
+const handleChange = ({props}) =&gt; ({target}) =&gt; props.handleChange({target: {id: target.id, value: {...props.data, [target.name]: target.value}}});
+const handleBooleanChange = ({props, id}) =&gt; ({target}) =&gt; props.handleChange({target: {id, value: {...props.data, [target.name]: loCaz(target) === &#039;true&#039;}}});
+const handleRemove = ({props, id}) =&gt; () =&gt; props.handleRemove({target: {id}});
+
+export const ToolkitFormColor = props =&gt; {
+    const {data} = props;
+    const {uuid, colorType, rgb, defaultColor, Description} = data;
+    const avg = {floatingLabel: true, onChange: handleChange({props})}
     return (
         &lt;Col s={3}&gt;
             &lt;Card&gt;
                 &lt;Row&gt;
-                    &lt;label htmlFor={`colorType-${color.uuid}`}&gt;colorType&lt;/label&gt;
+                    &lt;label htmlFor={`colorType-${uuid}`}&gt;colorType&lt;/label&gt;
                     &lt;div className=&#039;mui-select&#039;&gt;
-                        &lt;select defaultValue={color.colorType} id={color.uuid} name=&quot;colorType&quot; onChange={handleChange}&gt;
+                        &lt;select id={uuid} name=&quot;colorType&quot; defaultValue={colorType} onChange={handleChange({props})}&gt;
                             {toolkitSchema.properties.colors.items.properties.colorType.enum.map((colorType, i) =&gt; {
-                                return &lt;option key={`colorType-${color.uuid}-${i}`} id={color.uuid} value={colorType} label={colorType} /&gt;
+                                return &lt;option key={`colorType-${uuid}-${i}`} id={uuid} value={colorType} label={colorType} /&gt;
                             })}
                         &lt;/select&gt;
                     &lt;/div&gt;
-
-                    &lt;label htmlFor={`defaultColor-${color.uuid}`}&gt;defaultColor&lt;/label&gt;
-                    {/*&lt;div className=&#039;mui-select&#039;&gt;
-                        &lt;select defaultValue={color.defaultColor || false} id={color.uuid} name=&quot;defaultColor&quot; onChange={handleChange}&gt;
-                            {toolkitSchema.properties.colors.items.properties.defaultColor.enum.map((isDefault, i) =&gt; {
-                                return &lt;option key={`isDefault-${color.uuid}-${i}`} id={color.uuid} value={isDefault} label={isDefault} /&gt;
-                            })}
-                        &lt;/select&gt;
-                        &lt;Input name=&#039;rgb&#039; type=&#039;checkbox&#039; value=&#039;true&#039; label=&#039;Default Color&#039; /&gt;
-                    &lt;/div&gt;*/}
-                    &lt;Input name=&#039;defaultColor&#039; type=&#039;switch&#039; value={color.defaultColor} /&gt;
-
                     &lt;Input
+                        id={uuid}
+                        name=&quot;defaultColor&quot;
+                        type=&quot;checkbox&quot;
+                        label=&quot;default color&quot;
+                        onChange={handleBooleanChange({props})}
+                        defaultChecked={defaultColor}
+                    /&gt;
+                    &lt;Input
+                        id={uuid}
+                        name=&quot;rgb&quot;
+                        type=&quot;color&quot;
+                        floatingLabel={true}
+                        defaultValue={`#${rgb}`}
+                        onChange={handleChange({props, id: uuid})}
+                    /&gt;
+                &lt;/Row&gt;
+                &lt;Row&gt;
+                    &lt;Input
+                        id={uuid}
                         className=&quot;col&quot;
                         s={12}
-                        id={color.uuid}
+                        name=&quot;Description&quot;
                         type=&quot;text&quot;
                         label=&quot;Description&quot;
                         floatingLabel={true}
-                        defaultValue={color.Description || &#039;&#039;}
-                        name=&quot;Description&quot;
-                        onChange={handleChange}
+                        defaultValue={Description || &#039;&#039;}
+                        onChange={handleChange({props})}
                     /&gt;
-
                 &lt;/Row&gt;
                 &lt;Row&gt;
-                    &lt;Input type=&quot;color&quot; floatingLabel={true} defaultValue={`#${color.rgb}`} id={color.uuid} name=&quot;rgb&quot; onChange={handleChange}/&gt;
-                &lt;/Row&gt;
-                &lt;Row&gt;
-                    &lt;Button type=&quot;button&quot; size=&quot;small&quot; variant=&quot;raised&quot; id={color.uuid} name=&quot;colors&quot; onClick={handleRemove}&gt;remove&lt;/Button&gt;
+                    &lt;Button
+                        floating
+                        small
+                        raised
+                        type=&quot;button&quot;
+                        onClick={handleRemove({props, id: uuid})}
+                    &gt;
+                        &lt;Icon&gt;clear&lt;/Icon&gt;remove
+                    &lt;/Button&gt;
                 &lt;/Row&gt;
             &lt;/Card&gt;
         &lt;/Col&gt;
@@ -155,8 +166,9 @@ export const ToolkitFormColor = ({color, handleChange, handleRemove}) =&gt; {
 }
 
 // ToolkitFormColor.proptypes = {
-//     color: PropTypes.object.isRequired,
-//     handleChange: PropTypes.func.isRequired
+//     data: PropTypes.object.isRequired,
+//     handleChange: PropTypes.func.isRequired,
+//     handleDelete: PropTypes.func.isRequired,
 // };
 
 export default ToolkitFormColor;

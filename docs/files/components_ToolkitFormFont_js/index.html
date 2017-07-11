@@ -47,11 +47,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
-      <p class="stat">57.59</p>
+      <p class="stat">66.39</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
-      <p class="stat">40</p>
+      <p class="stat">48</p>
     </div>
   </div>
   <div class="row historical">
@@ -65,11 +65,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
-      <p class="stat">18.47</p>
+      <p class="stat">19.64</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
-      <p class="stat">0.36</p>
+      <p class="stat">0.43</p>
     </div>
   </div>
 </div>
@@ -93,37 +93,45 @@
 <div class="container">
   <div class="row">
     <textarea id="file-source" class="col-md-12">import React, {PropTypes} from &#039;react&#039;;
-import { Button, Card, Col, Collapsible, CollapsibleItem, Input, Row } from &#039;react-materialize&#039;;
+import { Button, Card, Col, Collapsible, CollapsibleItem, Icon, Input, Row } from &#039;react-materialize&#039;;
 
-export const ToolkitFormFont = ({font, handleChange, handleRemove}) =&gt; {
+const handleChange = ({props, id}) =&gt; ({target}) =&gt; props.handleChange({target: {id, value: {...props.data, [target.name]: target.value}}});
+const handleRemove = ({props, id}) =&gt; () =&gt; props.handleRemove({target: {id}});
+
+export const ToolkitFormFont = props =&gt; {
+    const {uuid, id, bold, displayName, fontFamily, fontName} = props.data;
+    const avg = {type: &#039;text&#039;, s: 12, floatingLabel: true, onChange: handleChange({props, id: uuid})};
     return (
         &lt;Col s={3}&gt;
             &lt;Card&gt;
-                &lt;h3 style={{fontFamily: font.fontName, textAlign: &#039;center&#039;}}&gt;{font.fontName}&lt;/h3&gt;
-                &lt;h3 style={{fontFamily: font.fontName, textAlign: &#039;center&#039;}}&gt;{font.fontName}&lt;/h3&gt;
-                &lt;h3 style={{fontFamily: font.fontName, textAlign: &#039;center&#039;}}&gt;&lt;i&gt;{font.fontName}&lt;/i&gt;&lt;/h3&gt;
-                &lt;h3 style={{fontFamily: font.fontName, textAlign: &#039;center&#039;}}&gt;&lt;b&gt;{font.fontName}&lt;/b&gt;&lt;/h3&gt;
-                &lt;h3 style={{fontFamily: font.fontName, textAlign: &#039;center&#039;}}&gt;&lt;b&gt;&lt;i&gt;{font.fontName}&lt;/i&gt;&lt;/b&gt;&lt;/h3&gt;
+                &lt;h5 style={{fontFamily: fontName, textAlign: &#039;center&#039;}}&gt;{fontName}&lt;/h5&gt;
+                &lt;h5 style={{fontFamily: fontName, textAlign: &#039;center&#039;}}&gt;{fontName}&lt;/h5&gt;
+                &lt;h5 style={{fontFamily: fontName, textAlign: &#039;center&#039;}}&gt;&lt;i&gt;{fontName}&lt;/i&gt;&lt;/h5&gt;
+                &lt;h5 style={{fontFamily: fontName, textAlign: &#039;center&#039;}}&gt;&lt;b&gt;{fontName}&lt;/b&gt;&lt;/h5&gt;
+                &lt;h5 style={{fontFamily: fontName, textAlign: &#039;center&#039;}}&gt;&lt;b&gt;&lt;i&gt;{fontName}&lt;/i&gt;&lt;/b&gt;&lt;/h5&gt;
                 &lt;Row&gt;
                     &lt;Collapsible popout&gt;
                         &lt;CollapsibleItem header=&quot;Edit&quot; icon=&#039;edit&#039;&gt;
                             &lt;Row&gt;
-                                &lt;Input type=&quot;text&quot; s={12} label=&quot;id&quot; floatingLabel={true} defaultValue={font.id} name=&quot;id&quot; id={font.uuid} onChange={handleChange}/&gt;
-                                &lt;Input type=&quot;text&quot; s={12} label=&quot;name&quot; floatingLabel={true} defaultValue={font.name} name=&quot;name&quot; id={font.uuid} onChange={handleChange}/&gt;
-                                &lt;Input type=&quot;text&quot; s={12} label=&quot;displayName&quot; floatingLabel={true} defaultValue={font.displayName} name=&quot;displayName&quot; id={font.uuid} onChange={handleChange}/&gt;
-                                &lt;Input type=&quot;text&quot; s={12} label=&quot;fontName&quot; floatingLabel={true} defaultValue={font.fontName} name=&quot;fontName&quot; id={font.uuid} onChange={handleChange}/&gt;
-                                &lt;Input type=&quot;text&quot; s={12} label=&quot;bold&quot; floatingLabel={true} defaultValue={font.bold} name=&quot;bold&quot; id={font.uuid} onChange={handleChange}/&gt;
-                                &lt;Col md={12}&gt;
-                                    &lt;Button type=&quot;button&quot; size=&quot;small&quot; variant=&quot;raised&quot; id={font.uuid} name=&quot;fonts&quot; onClick={handleRemove}&gt;remove&lt;/Button&gt;
-                                &lt;/Col&gt;
-                            &lt;/Row&gt;
-                            &lt;Row&gt;
-                                &lt;Col md={12}&gt;
-                                    &lt;Button type=&quot;button&quot; size=&quot;small&quot; variant=&quot;raised&quot; id={font.uuid} name=&quot;fonts&quot; onClick={handleRemove}&gt;remove&lt;/Button&gt;
-                                &lt;/Col&gt;
+                                &lt;Input {...avg} label=&quot;id&quot; defaultValue={id} name=&quot;id&quot;/&gt;
+                                &lt;Input {...avg} label=&quot;name&quot; defaultValue={props.data.name} name=&quot;name&quot;/&gt;
+                                &lt;Input {...avg} label=&quot;displayName&quot; defaultValue={displayName} name=&quot;displayName&quot;/&gt;
+                                &lt;Input {...avg} label=&quot;fontName&quot; defaultValue={fontName} name=&quot;fontName&quot;/&gt;
+                                &lt;Input {...avg} label=&quot;bold&quot; defaultValue={bold} name=&quot;bold&quot;/&gt;
                             &lt;/Row&gt;
                         &lt;/CollapsibleItem&gt;
                     &lt;/Collapsible&gt;
+                &lt;/Row&gt;
+                &lt;Row&gt;
+                    &lt;Button
+                        floating
+                        small
+                        raised
+                        type=&quot;button&quot;
+                        onClick={handleRemove({props, id: uuid})}
+                    &gt;
+                        &lt;Icon&gt;clear&lt;/Icon&gt;remove
+                    &lt;/Button&gt;
                 &lt;/Row&gt;
             &lt;/Card&gt;
         &lt;/Col&gt;

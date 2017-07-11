@@ -94,7 +94,7 @@
   <div class="row">
     <textarea id="file-source" class="col-md-12">import React from &#039;react&#039;;
 import { Card, Container, Row, Col } from &#039;react-materialize&#039;
-import Loader from &#039;../components/Loader&#039;;
+import ParsingInProgress from &#039;../components/ParsingInProgress&#039;;
 import DropService from &#039;./DropService&#039;;
 
 export const SVGUploader = props =&gt; {
@@ -104,8 +104,8 @@ export const SVGUploader = props =&gt; {
                 &lt;Card&gt;
                     &lt;Row&gt;
                         &lt;Col m=&quot;12&quot; className=&quot;center grey-text&quot;&gt;
-                            &lt;h2&gt;{!props.loading &amp;&amp; props.text}&lt;/h2&gt;
-                            {props.loading &amp;&amp; &lt;Loader/&gt;}
+                            &lt;h2&gt;{!props.parsing &amp;&amp; props.text}&lt;/h2&gt;
+                            {props.parsing &amp;&amp; &lt;ParsingInProgress/&gt;}
                         &lt;/Col&gt;
                     &lt;/Row&gt;
                 &lt;/Card&gt;

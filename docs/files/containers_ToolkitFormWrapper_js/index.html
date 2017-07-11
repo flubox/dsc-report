@@ -47,11 +47,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
-      <p class="stat">74.33</p>
+      <p class="stat">71.50</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
-      <p class="stat">91</p>
+      <p class="stat">272</p>
     </div>
   </div>
   <div class="row historical">
@@ -65,11 +65,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
-      <p class="stat">26.75</p>
+      <p class="stat">58.70</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
-      <p class="stat">0.95</p>
+      <p class="stat">4.29</p>
     </div>
   </div>
 </div>
@@ -93,83 +93,264 @@
 <div class="container">
   <div class="row">
     <textarea id="file-source" class="col-md-12">import React, {Component, PropTypes} from &#039;react&#039;;
-import SearchInput from &#039;../components/SearchInput&#039;;
-import SVGUploader from &#039;../services/SVGUploader&#039;;
-import ToolkitForm from &#039;./ToolkitForm&#039;;
+import ToolkitForm from &#039;../components/ToolkitForm&#039;;
+import services from &#039;../services&#039;;
 import {initialState} from &#039;../states/toolkit&#039;;
-import { Container, Row} from &#039;react-materialize&#039;
+import { Card, Col, Container, ProgressBar, Row } from &#039;react-materialize&#039;
+import Loader from &#039;../components/Loader&#039;;
 import autobind from &#039;autobind-decorator&#039;;
 import toolkitSchema from &#039;../schemas/toolkit.json&#039;;
 import createPropTypes from &#039;react-json-schema-proptypes&#039;;
-import {excludeFunctionsFromProps, handleDrop, handleToolkitDrop, responseToJson} from &#039;../helpers&#039;;
+import uuidV4 from &#039;uuid/v4&#039;;
+import {addUuidToArray, excludeFunctionsFromProps, handleDrop, handleToolkitDrop, jsonIfStatus2XX, promiseByData, responseToJson} from &#039;../helpers&#039;;
 
-export const subComponentMaker = ReactComponent =&gt; props =&gt; data =&gt; {
-    const {handleSave, handleReset, upload} = props;
-    const componentProps = {...props, ...data, toolkit: data.toolkits[0]};
-    return &lt;ReactComponent {...componentProps}/&gt;;
-}
+export const addUuid = toolkit =&gt; ({...toolkit, colors: addUuidToArray(toolkit.colors), images: addUuidToArray(toolkit.images), fonts: addUuidToArray(toolkit.fonts)});
 
-subComponentMaker.PropTypes = {
-    ReactComponent: PropTypes.element.isRequired
-};
+export const filterKeys = blacklistedKey =&gt; object =&gt; Object.keys(object).filter(k =&gt; !blacklistedKey.includes(k)).reduce((a, b) =&gt; ({...a, [b]: object[b]}), {});
+
+export const blacklistedKey = [&#039;hash&#039;, &#039;md5&#039;, &#039;uuid&#039;];
+
+export const removeHash = data =&gt; ({
+    ...data,
+    colors: data.colors.map(filterKeys(blacklistedKey)),
+    images: data.images.map(filterKeys(blacklistedKey)),
+    fonts: data.fonts.map(filterKeys(blacklistedKey))
+});
+
+const tmpBugFix = read =&gt; data =&gt; ({
+    ...data,
+    images: data.images.map(image =&gt; {
+        const {id, imageType, urlThumb, urlScaled, urlFull, urlSvg, thumbUrl, scaledUrl} = image;
+        if (read) {
+            const result = Object.keys(image)
+            .filter(k =&gt; ![&#039;thumbUrl&#039;, &#039;scaledUrl&#039;].includes(k))
+            .map(k =&gt; ({[k]: image[k]}))
+            .reduce((a, b) =&gt; ({...a, ...b}), {urlThumb: image.thumbUrl, urlScaled: image.scaledUrl});
+            return result;
+        }
+        return Object.keys(image)
+        .filter(k =&gt; ![&#039;urlThumb&#039;, &#039;urlScaled&#039;].includes(k))
+        .map(k =&gt; ({[k]: image[k]}))
+        .reduce((a, b) =&gt; ({...a, ...b}), {thumbUrl: image.urlThumb, scaledUrl: image.urlScaled});
+    })
+})
 
 @autobind
 class ToolkitFormWrapper extends Component {
-    constructor (props) {
-        super(props);
-        this.state = {data: undefined, loading: false, env: props.location.query.env || props.route.config.env};
+    componentWillMount() {
+        this.setState({
+            data: undefined,
+            ui: {
+                addingNewImage: false,
+                newImagesAdded: [],
+                new: false,
+                saved: false,
+                errors: undefined,
+                loading: false,
+                saving: false,
+                parsing: false,
+            },
+            env: this.props.location.query.env || this.props.route.config.env
+        }, () =&gt; {
+            const {id} = this.props.location.query;
+            this.setState({ ui: {...this.state.ui, new: !id, loading: !!id}, url: !!id ? this.getUrl(&#039;GET&#039;, id) : undefined});
+        });
+    }
+
+    // checkIfIdExists(id) {
+    //     return new Promise((resolve, reject) =&gt; {
+    //         id = id || this.state.data;
+    //         if (id) {
+    //             const method = &#039;GET&#039;;
+    //             const { api } = this.props.route.config;
+    //             const url = `${api.root[this.props.env]}${api.toolkits[method]}`.replace(&#039;{id}&#039;, id);
+    //             const headers = new Headers({mode: &#039;cors&#039;});
+    //             headers.append(&#039;Content-Type&#039;, &#039;application/json&#039;);
+
+    //             fetch(url, { method, cache: &#039;reload&#039;, headers })
+    //             .then(jsonIfStatus2XX)
+    //             .then(promiseByData(resolve, reject))
+    //             .catch(reject);
+    //         }
+    //     });
+    // }
+
+    // componentWillMount() {
+    //     this.checkIfIdExists()
+    //     .then(console.info)
+    //     .then(data =&gt; this.setState({ui: {...this.state.ui, new: false, saved: true}}))
+    //     .catch(data =&gt; this.setState({ui: {...this.state.ui, new: true, saved: false}}))
+    //     ;
+    // }
+
+    getUrl(method, id) {
+        const {root, toolkits} = this.props.route.config.api;
+        return `${root[this.state.env]}${toolkits[method].replace(&#039;{id}&#039;, id)}`;
+    }
+
+    handleChange(data) {
+        this.setState({data}, this.forceUpdate);
     }
 
     handleDrop(files) {
-        this.setState({loading: true}, () =&gt; {
+        this.setState({ui: {...this.state.ui, errors: undefined, parsing: true}}, () =&gt; {
             handleToolkitDrop(this.props.route)(files[0])
-            .then(data =&gt; this.setState({data: data.toolkits[0], loading: false}))
+            .then(data =&gt; {
+                this.setState({data: addUuid(data.toolkits[0]), ui: {...this.state.ui, parsing: false}}, () =&gt; {
+                    console.info(&#039;this.state.data.id&#039;, this.state.data.id);
+                    const method = &#039;GET&#039;;
+                    const {api} = this.props.route.config;
+                    const url = `${api.root[this.state.env]}${api.toolkits[method].replace(&#039;{id}&#039;, this.state.data.id)}`;
+                    fetch(url, {method, cache: &#039;reload&#039;})
+                    .then(jsonIfStatus2XX)
+                    .then(() =&gt; this.setState({ui: {...this.state.ui, new: false}}))
+                    .catch(error =&gt; this.setState({ui: {...this.state.ui, new: true}}));
+                });
+            });
+        });
+    }
+
+    handleFetch (id = this.state.data.id) {
+        // console.warn(&#039;ToolkitFormWrapper&#039;, &#039;handleFetch&#039;, id);
+        this.setState({ui: {...this.state.ui, loading: true, errors: undefined}}, () =&gt; {
+            const method = &#039;GET&#039;;
+            const {api} = this.props.route.config;
+            const url = `${api.root[this.state.env]}${api.toolkits[method].replace(&#039;{id}&#039;, id)}`;
+            fetch(url, {method, cache: &#039;reload&#039;})
+            .then(jsonIfStatus2XX)
+            .then(data =&gt; this.setState({data: addUuid(tmpBugFix(true)(data)), ui: {...this.state.ui, new: false, loading: false}}))
+            .catch(this.onFail)
+            ;
+        });
+    }
+
+    handleDelete () {
+        const {id} = this.state.data;
+        console.info(&#039;ToolkitFormWrapper&#039;, &#039;handleDelete&#039;, id, this.state.data.id);
+        const method = &#039;DELETE&#039;;
+        const {api} = this.props.route.config;
+        const url = `${api.root[this.state.env]}${api.toolkits[method].replace(&#039;{id}&#039;, id)}`;
+        const headers = new Headers({mode: &#039;cors&#039;});
+        headers.append(&#039;Content-Type&#039;, &#039;application/json&#039;);
+        fetch(url, {method, cache: &#039;reload&#039;, headers})
+        .then(jsonIfStatus2XX)
+        .then(json =&gt; this.setState({data: undefined, ui: {...this.state.ui, new: true, saved: false, saving: false}}))
+        ;
+    }
+
+    handleSave () {
+        this.setState({ui: {...this.state.ui, saving: true}});
+        const fixRgb = data =&gt; ({...data, colors: data.colors.map(color =&gt; ({...color, rgb: color.rgb.replace(&#039;#&#039;, &#039;&#039;)}))});
+        //TMP BUGFIX
+        const data = fixRgb(tmpBugFix(false)(removeHash(this.state.data)));
+        const { api } = this.props.route.config;
+        const method = this.state.ui.new ? &#039;POST&#039; : &#039;PUT&#039;
+        const url = `${api.root[this.state.env]}${api.toolkits[method].replace(&#039;{id}&#039;, data.id)}`;
+        const request = new Request(
+            url,
+            {
+                method,
+                mode: &#039;cors&#039;,
+                headers: new Headers({ &#039;Content-Type&#039;: &#039;application/json&#039; }),
+                body: JSON.stringify(data)
+            }
+        );
+
+        fetch(request)
+        .then(() =&gt; {
+            this.setState({ui: {...this.state.ui, saved: true, saving: false, new: false}})
+        })
+        ;
+    }
+
+    handleReset() {
+        this.setState({data: undefined, url: undefined});
+    }
+
+    onNewImageDropped(newImagesAdded) {
+        // console.info(&#039;\n ToolkitFormWrapper&#039;, &#039;onNewImageDropped&#039;, &#039;newImagesAdded&#039;, newImagesAdded);
+        this.setState({ui: {...this.state.ui, addingNewImage: true, newImagesAdded: this.state.ui.newImagesAdded.concat(newImagesAdded)}})
+    }
+
+    onS3UploadedFiles(promisedFiles) {
+        // console.info(&#039;\n ToolkitFormWrapper&#039;, &#039;onS3UploadedFiles&#039;, &#039;promisedFiles&#039;, promisedFiles);
+        // this.setState({ui: {...this.state.ui, addingNewImage: true}});
+        const sort = (a, b) =&gt; {
+            const wh1 = a.width &lt; b.width &amp;&amp; a.height &lt; b.height;
+            const wh2 = a.width &gt; b.width &amp;&amp; a.height &gt; b.height;
+            return wh1 ? -1 : wh2 ? 1 : 0;
+        };
+        const cleanMap = [&#039;urlThumb&#039;, &#039;urlScaled&#039;, &#039;urlFull&#039;];
+        const clean = (each, i) =&gt; ({[cleanMap[i]]: each.Location});
+        const merge = (a, b) =&gt; ({...a, ...b});
+
+        promisedFiles.then(files =&gt; {
+            const images = this.state.data.images
+            .concat(
+                files
+                .sort(sort)
+                .map(clean)
+                .reduce(merge, {
+                    uuid: uuidV4(),
+                    id: files[0].originalName,
+                    imageType: toolkitSchema.properties.images.items.properties.imageType.enum[0],
+                    ratioX: 1,
+                    ratioY: 1,
+                    locale: undefined
+                })
+            );
+            console.warn(&#039;ToolkitFormWrapper&#039;, files, images);
+            this.setState({data: {...this.state.data, images}, ui: {...this.state.ui, addingNewImage: false, newImagesAdded: []}})
         })
     }
 
-    handleFetch (id) {
-        const {api, env} = this.props.route.config;
-        const url = `${api.root[env]}${api.toolkits.GET.replace(&#039;{id}&#039;, id)}`;
-        fetch(url, {method: &#039;GET&#039;, cache: &#039;reload&#039;}).then(responseToJson).then(json =&gt; this.setState(json));
-    }
-
-    handleSave (body) {
-        // this.props.upload(body)(&#039;POST&#039;)(removeHash(this.state.body))
-        if (typeof body !== &#039;string&#039;) {
-            return this.handleSave(JSON.stringify(body));
-        }
-        const { api, env } = this.props.route.config;
-        const url = `${api.root[this.state.env]}${api.toolkits.POST}`;
-        const headers = new Headers({mode: &#039;cors&#039;});
-        headers.append(&#039;Content-Type&#039;, &#039;application/json&#039;);
-
-        fetch(url, { method: &#039;POST&#039;, cache: &#039;reload&#039;, body, headers })
-        .then(response =&gt; {
-            console.info(&#039;...&#039;, &#039;response&#039;, response);
+    onFail(error) {
+        const {status, statusText} = error;
+        this.setState({ui: {...this.state.ui, errors: [{status, error: statusText}], loading: false, parsing: false}, url: undefined}, () =&gt; {
+            setTimeout(() =&gt; {
+                this.setState({ui: {...this.state.ui, errors: undefined, loading: false, parsing: false}});
+            }, 3000);
         });
     }
-    handleReset() {
-        this.setState({data: undefined});
+
+    onGet(data) {
+        this.setState({data: addUuid(tmpBugFix(true)(data)), ui: {...this.state.ui, loading: false}});
     }
 
     render () {
-        const {handleSave, handleReset, props, state} = this;
-        const reProps = {...this.props, ...this.state};
+        const {handleChange, handleDelete, handleFetch, handleReset, handleSave, onNewImageDropped, onS3UploadedFiles, onFail, onGet, props, state} = this;
+        const reProps = {...this.props, ...this.state, AWS, handleChange, handleDelete, handleReset, handleSave, onNewImageDropped, onS3UploadedFiles};
+        const replaceWithProps = {...this.props, data: this.state.replaceWith};
+
         return (
             &lt;Row&gt;
-                &lt;SearchInput handleKeyPress={this.handleFetch}/&gt;
+                &lt;services.search done={handleFetch}/&gt;
+                {!this.state.ui.errors &amp;&amp; &lt;services.fetch url={!this.state.data &amp;&amp; this.state.url} done={onGet} fail={onFail}/&gt;}
                 &lt;Row&gt;
-                    {this.state.data ? (
+                    {this.state.ui.errors &amp;&amp; (
+                        &lt;services.error errors={this.state.ui.errors}/&gt;
+                    )}
+                    {this.state.data &amp;&amp; (
                         &lt;Container&gt;
-                            &lt;ToolkitForm {...reProps} handleSave={handleSave} handleReset={handleReset}/&gt;
+                            &lt;ToolkitForm {...reProps} id={this.state.data.id} /&gt;
                         &lt;/Container&gt;
-                    ) : (
-                        &lt;SVGUploader
+                    )}
+                    {!this.state.ui.errors &amp;&amp; !this.state.data &amp;&amp; !this.state.ui.loading &amp;&amp; (
+                        &lt;services.SVGUploader
                             text={&#039;Drop your SVG file here...&#039;}
-                            data={state.data}
-                            loading={state.loading}
+                            data={this.state.data}
+                            parsing={this.state.ui.parsing}
                             onDrop={this.handleDrop}
                         /&gt;
+                    )}
+                    {!this.state.ui.errors &amp;&amp; !this.state.data &amp;&amp; this.state.ui.loading &amp;&amp; (
+                        &lt;Container&gt;
+                            &lt;Col s={12}&gt;
+                                &lt;Card&gt;
+                                    &lt;Loader/&gt;
+                                &lt;/Card&gt;
+                            &lt;/Col&gt;
+                        &lt;/Container&gt;
                     )}
                 &lt;/Row&gt;
             &lt;/Row&gt;

@@ -51,7 +51,7 @@
     </div>
     <div class="col-md-6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
-      <p class="stat">19</p>
+      <p class="stat">20</p>
     </div>
   </div>
   <div class="row historical">
@@ -100,7 +100,7 @@ export const FetchAltPagesService = props =&gt; {
     const { url, data, mode, method, cache, headers, done } = props;
     if (url &amp;&amp; _.isEmpty(data)) {
         const request = new Request(url, {
-            mode: mode || &#039;écors&#039;,
+            mode: mode || &#039;cors&#039;,
             method: method || &#039;GET&#039;,
             cache: cache || &#039;reload&#039;,
             headers: headers || new Headers({&#039;Content-Type&#039;: &#039;application/json&#039;})
@@ -110,7 +110,8 @@ export const FetchAltPagesService = props =&gt; {
     return &lt;div&gt;{props.children || false}&lt;/div&gt;;
 }
 
-export default FetchAltPagesService</textarea>
+export default FetchAltPagesService
+</textarea>
   </div>
 </div>
 

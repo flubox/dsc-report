@@ -47,11 +47,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
-      <p class="stat">76.17</p>
+      <p class="stat">69.71</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
-      <p class="stat">60</p>
+      <p class="stat">74</p>
     </div>
   </div>
   <div class="row historical">
@@ -65,11 +65,11 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
-      <p class="stat">19.99</p>
+      <p class="stat">22.13</p>
     </div>
     <div class="col-md-6">
       <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
-      <p class="stat">0.61</p>
+      <p class="stat">0.68</p>
     </div>
   </div>
 </div>
@@ -93,59 +93,73 @@
 <div class="container">
   <div class="row">
     <textarea id="file-source" class="col-md-12">import React, {PropTypes} from &#039;react&#039;;
+import ReactTooltip from &#039;react-tooltip&#039;;
 import toolkitSchema from &#039;../schemas/toolkit.json&#039;;
-import { Button, Card, CardTitle, Col, Container, MediaBox, Input, Icon, Row } from &#039;react-materialize&#039;
+import { Button, Card, CardTitle, Col, Container, MediaBox, Icon, Input, Row } from &#039;react-materialize&#039;
 import Loader from &#039;./Loader&#039;;
 
-export const ToolkitFormImage = ({image, handleChange, handleRemove}) =&gt; {
-    return image.loading ? (
-        &lt;Col s={3}&gt;
-            &lt;Card&gt;
-                &lt;Loader/&gt;
-            &lt;/Card&gt;
-        &lt;/Col&gt;
+const handleChange = ({props}) =&gt; ({target}) =&gt; props.handleChange({target: {id: target.id, value: {...props.data, [target.name]: target.value}}});
+const handleRemove = ({props, id}) =&gt; () =&gt; props.handleRemove({target: {id}});
+
+export const ToolkitFormImage = props =&gt; {
+    const {data} = props;
+    const {uuid, id, urlThumb, urlScaled, urlFull, urlSvg, imageType, ratioX, ratioY, loading} = data;
+    const avg = {type: &#039;text&#039;, onChange: handleChange({props}), s: 12}
+    return loading ? (
+        &lt;Col s={3}&gt;&lt;Card&gt;&lt;Loader/&gt;&lt;/Card&gt;&lt;/Col&gt;
     ) : (
         &lt;Col s={3}&gt;
             &lt;Card
-                header={&lt;CardTitle reveal image={image.urlThumb || image.urlFull} waves=&quot;light&quot;&gt;&lt;/CardTitle&gt;}
+                header={&lt;CardTitle reveal image={urlThumb || urlFull} waves=&quot;light&quot;&gt;&lt;/CardTitle&gt;}
                 reveal={(
                         &lt;Row&gt;
-                            &lt;select s={12} id=&quot;imageType&quot; defaultValue={`${toolkitSchema.properties.images.items.properties.imageType.enum[0]}`} label=&quot;imageType&quot; floatingLabel={true} name=&quot;imageType&quot; id={image.uuid} onChange={handleChange} value={image.imageType}&gt;
+                            &lt;select s={12} id=&quot;imageType&quot; label=&quot;imageType&quot; floatingLabel={true} name=&quot;imageType&quot; id={uuid} onChange={handleChange} value={imageType}&gt;
                                 {toolkitSchema.properties.images.items.properties.imageType.enum.map(type =&gt; {
                                     return &lt;option key={`imageType-${type}`} value={type} label={type} /&gt;
                                 })}
                             &lt;/select&gt;
 
-                            &lt;Input s={12} type=&quot;text&quot; key={`image-id-${image.uuid}`} label=&quot;id&quot; floatingLabel={true} defaultValue={image.id} name=&quot;id&quot; id={image.uuid} onChange={handleChange}/&gt;
+                            &lt;Input {...avg} key={`image-id-${uuid}`} label=&quot;id&quot; floatingLabel={true} defaultValue={id} name=&quot;id&quot; id={uuid}/&gt;
 
-                            &lt;Input s={12} type=&quot;text&quot; key={`urlThumb-${image.uuid}`} label=&quot;urlThumb&quot; floatingLabel={true} defaultValue={image.urlThumb} name=&quot;urlThumb&quot; id={image.uuid} nChange={handleChange}/&gt;
+                            &lt;Input {...avg} key={`urlThumb-${uuid}`} label=&quot;urlThumb&quot; floatingLabel={true} defaultValue={urlThumb} name=&quot;urlThumb&quot; id={uuid}/&gt;
 
-                            &lt;Input s={12} type=&quot;text&quot; key={`urlScaled-${image.uuid}`} label=&quot;urlScaled&quot; floatingLabel={true} defaultValue={image.urlScaled} name=&quot;urlScaled&quot; id={image.uuid} onChange={handleChange}/&gt;
+                            &lt;Input {...avg} key={`urlScaled-${uuid}`} label=&quot;urlScaled&quot; floatingLabel={true} defaultValue={urlScaled} name=&quot;urlScaled&quot; id={uuid}/&gt;
 
-                            &lt;Input s={12} type=&quot;text&quot; key={`urlFull-${image.uuid}`} label=&quot;urlFull&quot; floatingLabel={true} defaultValue={image.urlFull} name=&quot;urlFull&quot; id={image.uuid} nChange={handleChange}/&gt;
+                            &lt;Input {...avg} key={`urlFull-${uuid}`} label=&quot;urlFull&quot; floatingLabel={true} defaultValue={urlFull} name=&quot;urlFull&quot; id={uuid}/&gt;
 
-                            &lt;Input s={6} id=&quot;ratioX&quot; type=&quot;number&quot; key={`ratioX-${image.uuid}`} label=&quot;ratioX&quot; floatingLabel={true} defaultValue={image.ratioX} name=&quot;ratioX&quot; id={image.uuid} onChange={handleChange}/&gt;
-                            &lt;Input s={6} id=&quot;ratioY&quot; type=&quot;number&quot; key={`ratioY-${image.uuid}`} label=&quot;ratioY&quot; floatingLabel={true} defaultValue={image.ratioY} name=&quot;ratioY&quot; id={image.uuid} onChange={handleChange}/&gt;
+                            {urlSvg &amp;&amp; &lt;Input {...avg} key={`urlSvg-${uuid}`} label=&quot;urlSvg&quot; floatingLabel={true} defaultValue={urlSvg} name=&quot;urlSvg&quot; id={uuid}/&gt;}
 
-                            &lt;select
-                                s={12}
+                            &lt;Input {...avg} key={`ratioX-${uuid}`} s={6} label=&quot;ratioX&quot; floatingLabel={true} defaultValue={ratioX} type=&quot;number&quot; name=&quot;ratioX&quot; id={uuid} /&gt;
+
+                            &lt;Input {...avg} key={`ratioY-${uuid}`} s={6} label=&quot;ratioY&quot; floatingLabel={true} defaultValue={ratioY} type=&quot;number&quot; name=&quot;ratioY&quot; id={uuid}/&gt;
+
+                            &lt;Input
+                                {...avg}
                                 id=&quot;Locale&quot;
-                                defaultValue={`${toolkitSchema.properties.images.items.properties.Locale.enum[1]}`}
+                                type=&quot;select&quot;
                                 label=&quot;Locale&quot;
                                 floatingLabel={true}
                                 name=&quot;Locale&quot;
-                                id={image.uuid}
-                                onChange={handleChange}
+                                id={uuid}
                             &gt;
                                 {toolkitSchema.properties.images.items.properties.Locale.enum.map((locale, i) =&gt; {
-                                    return &lt;option key={`Locale-${image.uuid}-${locale}-${i}`} defaultValue={locale} label={locale} /&gt;
+                                    return (&lt;option key={`Locale-${uuid}-${locale}-${i}`} value={locale} label={locale}&gt;{locale}&lt;/option&gt;)
                                 })}
-                            &lt;/select&gt;
+                            &lt;/Input&gt;
                         &lt;/Row&gt;
                 )}
             &gt;
-                &lt;Button type=&quot;button&quot; size=&quot;small&quot; variant=&quot;raised&quot; id={image.uuid} name=&quot;images&quot; onClick={handleRemove}&gt;remove&lt;/Button&gt;
+                    &lt;Button
+                        floating
+                        small
+                        raised
+                        type=&quot;button&quot;
+                        onClick={handleRemove({props, id: uuid})}
+                    &gt;
+                        &lt;Icon&gt;clear&lt;/Icon&gt;remove
+                    &lt;/Button&gt;
             &lt;/Card&gt;
+            &lt;ReactTooltip /&gt;
         &lt;/Col&gt;
     );
 }
